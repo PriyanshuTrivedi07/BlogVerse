@@ -4,6 +4,7 @@ import appwriteService from "../appwrite/config";
 import { Button, Container, ConfirmationPopup } from "../components";
 import parse from "html-react-parser";
 import { useSelector } from "react-redux";
+import '../index.css'
 
 export default function Post() {
     const [post, setPost] = useState(null);
@@ -16,20 +17,23 @@ export default function Post() {
 
     const isAuthor = post && userData ? post.userId === userData.$id : false;
 
+    
     useEffect(() => {
         if (slug) {
             appwriteService.getPost(slug)
-                .then((post) => {
-                    console.log(post)
-                    if (post) setPost(post);
-                    else navigate("/");
-                })
-                .finally(() => {
-                    setIsLoading(false)
-                })
+            .then((post) => {
+                console.log(post)
+                if (post) setPost(post);
+                else navigate("/");
+            })
+            .finally(() => {
+                setIsLoading(false)
+            })
         } else navigate("/");
     }, [slug, navigate]);
-
+    useEffect(() => {
+        Prism.highlightAll();
+      }, [post]);
 
     const handleDelete = () => {
         setShowConfirmation(true)
@@ -79,7 +83,7 @@ export default function Post() {
                             <div className="w-full">
                                 <h1 className="text-3xl font-bold">{post.title}</h1>
                             </div>
-                            <div className="browser-css">
+                            <div className="prose-base prose-ul:list-disc prose-pre:bg-gray-800 prose-a:text-blue-400 hover:prose-a:text-blue-500 prose-a:underline">
                                 {parse(post.content)}
                             </div>
 
