@@ -1,11 +1,12 @@
 import conf from "../conf/conf";
 import nprogress from 'nprogress';
 import 'nprogress/nprogress.css';
-import { Client, Account, ID } from "appwrite";
+import { Client, Account, ID, Avatars } from "appwrite";
 
 export class AuthService {
     client = new Client();
     account;
+    avatars;
 
     constructor() {
         this.client
@@ -13,6 +14,7 @@ export class AuthService {
             .setProject(conf.appwriteProjectId); // Project ID
 
         this.account = new Account(this.client)
+        this.avatars = new Avatars(this.client)
     }
 
 
@@ -76,6 +78,11 @@ export class AuthService {
         }
 
     }
+    
+    getInitialAvatar(username){
+        return this.avatars.getInitials(username)
+    }
+
 }
 
 const authService = new AuthService()
