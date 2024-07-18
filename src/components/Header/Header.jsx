@@ -1,14 +1,16 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Container, Logo, LogoutBtn } from '../index'
 import { Link, useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
-
+import authService from '../../appwrite/auth'
 
 
 function Header() {
   const authStatus = useSelector((state) => state.auth.status)
+  const userData = useSelector((state) => state.auth.userData);
   const navigate = useNavigate()
   const [isOpen, setIsOpen] = useState(false);
+  const [avatarUrl, setAvatarUrl] = useState(null)
 
   const navItems = [
     {
@@ -43,6 +45,13 @@ function Header() {
     },
   ]
 
+  useEffect(() => {
+    if (userData) {
+      const avatarUrl = authService.getInitialAvatar(userData.name)
+      setAvatarUrl(avatarUrl)
+    }
+  }, [userData])
+
   return (
     <header className='sticky top-0 z-50'>
       <nav className="bg-gray-900 text-white shadow-md">
@@ -63,64 +72,74 @@ function Header() {
             </div>
 
             {/* Nav Links */}
-            <div className="hidden md:block">
-              <div className="ml-10 flex items-baseline space-x-4">
-                <ul className='flex gap-2 items-center justify-center ml-auto'>
-                  {navItems.map((item) =>
-                    item.active ? (
-                      <li key={item.name}>
-                        <button
-                          className={`px-4 py-2 rounded-md text-base duration-150 font-medium ${item.className}`}
-                          onClick={() => navigate(item.slug)}
-                        >
-                          {item.name}
-                        </button>
-                      </li>
-                    ) : null
-                  )}
-                  {authStatus && (
-                    <li>
-                      <LogoutBtn />
-                    </li>
-                  )}
-                </ul>
-              </div>
-            </div>
+            <div className='flex gap-2'>
+              <div className='flex gap-2'>
+                <div className="hidden md:block">
+                  <div className="ml-10 flex items-baseline space-x-4">
+                    <ul className='flex gap-2 items-center justify-center ml-auto'>
+                      {navItems.map((item) =>
+                        item.active ? (
+                          <li key={item.name}>
+                            <button
+                              className={`px-4 py-2 rounded-md text-base duration-150 font-medium ${item.className}`}
+                              onClick={() => navigate(item.slug)}
+                            >
+                              {item.name}
+                            </button>
+                          </li>
+                        ) : null
+                      )}
+                      {authStatus && (
+                        <li>
+                          <LogoutBtn />
+                        </li>
+                      )}
+                    </ul>
+                  </div>
+                </div>
 
-            {/* Responsive Ham-burger Menu */}
-            <div className="flex md:hidden">
-              <button
-                onClick={() => setIsOpen(!isOpen)}
-                type="button"
-                className="bg-gray-800 inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white"
-                aria-controls="mobile-menu"
-                aria-expanded="false"
-              >
-                <span className="sr-only">Open main menu</span>
-                {!isOpen ? (
-                  <svg
-                    className="block h-6 w-6"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    aria-hidden="true"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7" />
-                  </svg>
-                ) : (
-                  <svg
-                    className="block h-6 w-6"
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    stroke="currentColor"
-                    aria-hidden="true"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                )}
-              </button>
+                {authStatus &&
+                  <div className='flex gap-2 items-center justify-center'>
+                    <img className='w-10 h-10 rounded-full' src={avatarUrl} alt="user-avatar" />
+                  </div>
+                }
+              </div>
+
+              {/* Responsive Ham-burger Menu */}
+              <div className="flex md:hidden">
+                <button
+                  onClick={() => setIsOpen(!isOpen)}
+                  type="button"
+                  className="bg-gray-800 inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-white hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-white"
+                  aria-controls="mobile-menu"
+                  aria-expanded="false"
+                >
+                  <span className="sr-only">Open main menu</span>
+                  {!isOpen ? (
+                    <svg
+                      className="block h-6 w-6"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      aria-hidden="true"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16m-7 6h7" />
+                    </svg>
+                  ) : (
+                    <svg
+                      className="block h-6 w-6"
+                      xmlns="http://www.w3.org/2000/svg"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                      aria-hidden="true"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  )}
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -144,10 +163,12 @@ function Header() {
                 ) : null
               )}
               {authStatus && (
-                <li>
-                  {/* TODO: add a onclick in logout button to setIsOpen to false */}
-                  <LogoutBtn />
-                </li>
+                <>
+                  <li>
+                    {/* TODO: add a onclick in logout button to setIsOpen to false */}
+                    <LogoutBtn />
+                  </li>
+                </>
               )}
             </ul>
           </div>
