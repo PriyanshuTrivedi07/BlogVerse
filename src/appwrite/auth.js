@@ -29,7 +29,7 @@ export class AuthService {
                 return userAccount;
             }
         } catch (error) {
-            console.log("Appwrite service :: createAccount :: error", error);
+            throw error
         } finally {
             nprogress.done()
         }
@@ -40,7 +40,6 @@ export class AuthService {
         try {
             return await this.account.createEmailPasswordSession(email, password);
         } catch (error) {
-            // console.log("Appwrite service :: login :: error", error);
             throw error
         } finally {
             nprogress.done()
@@ -52,14 +51,7 @@ export class AuthService {
         try {
             return await this.account.get();
         } catch (error) {
-            // console.log("Appwrite service :: getCurrentUser :: error", error);
-            // if (error.code === 401) {
-            //     console.log('You are not logged in');
-            //     // Display the message on the home page
-            // } else {
-            //     console.error('An unexpected error occurred:', error);
-            // }
-            throw error;
+            throw error
         } finally {
             nprogress.done()
         }
@@ -72,18 +64,37 @@ export class AuthService {
         try {
             await this.account.deleteSessions();
         } catch (error) {
-            console.log("Appwrite service :: logout :: error", error);
+            throw error
         } finally {
             nprogress.done()
         }
 
     }
-    
-    getInitialAvatar(username){
+
+    getInitialAvatar(username) {
         return this.avatars.getInitials(username)
     }
 
 }
+
+// Handle errors and show appropriate toast notifications
+// const handleError = (error) => {
+//     let errorMessage = 'An unknown error occurred';
+
+//     if (error.response) {
+//         errorMessage = error.response.data.message;
+//     } else if (error.message) {
+//         errorMessage = error.message;
+//     }
+
+//     // Display toast notification
+//     toast.error(`Error: ${errorMessage}`);
+
+//     // Optionally log errors to the console based on error type or severity
+//     // if (shouldLogError(error)) {
+//     //     console.error('Error:', error);
+//     // }
+// };
 
 const authService = new AuthService()
 

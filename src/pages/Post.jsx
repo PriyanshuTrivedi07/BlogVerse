@@ -5,6 +5,7 @@ import { Button, Container, ConfirmationPopup } from "../components";
 import parse from "html-react-parser";
 import { useSelector } from "react-redux";
 import '../index.css'
+import { toast } from "react-toastify";
 
 export default function Post() {
     const [post, setPost] = useState(null);
@@ -17,7 +18,7 @@ export default function Post() {
 
     const isAuthor = post && userData ? post.userId === userData.$id : false;
 
-    function formateDate(dateString){
+    function formateDate(dateString) {
         const date = new Date(dateString);
         return date.toLocaleDateString()
     }
@@ -28,12 +29,14 @@ export default function Post() {
                 .then((post) => {
                     if (post) setPost(post);
                     else navigate("/");
+                }).catch((error) => {
+                    toast.error(`Can't fetch post : ${error.message}`)
                 })
                 .finally(() => {
                     setIsLoading(false)
                 })
         } else navigate("/");
-    }, [slug, navigate]);
+    }, [slug]);
 
     useEffect(() => {
         Prism.highlightAll();
@@ -51,8 +54,11 @@ export default function Post() {
             .then((status) => {
                 if (status) {
                     appwriteService.deleteFile(post.featuredImage);
+                    toast.success('Post Deleted successfully')
                     navigate("/");
                 }
+            }).catch((error) => {
+                toast.error(`Can't Delete Post : ${error.message}`)
             })
             .finally(() => {
                 setShowConfirmation(false)

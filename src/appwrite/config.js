@@ -3,6 +3,9 @@ import nprogress from 'nprogress';
 import 'nprogress/nprogress.css';
 import { Client, ID, Databases, Storage, Query, Flag } from "appwrite"
 nprogress.configure({ easing: 'ease', showSpinner: true});
+import { toast } from "react-toastify";
+
+
 export class Service {
     client = new Client();
     databases;
@@ -34,7 +37,7 @@ export class Service {
                 }, 
             );
         } catch (error) {
-            console.log("Appwrite service :: createPost :: error", error);
+            throw error;
         } finally{
             nprogress.done()
         }
@@ -55,8 +58,7 @@ export class Service {
                 }
             )
         } catch (error) {
-            console.log("Appwrite service :: updataPost :: error", error);
-
+            throw error;
         } finally{
             nprogress.done()
         }
@@ -72,7 +74,7 @@ export class Service {
             )
             return true;
         } catch (error) {
-            console.log("Appwrite service :: deletePost :: error", error);
+            throw error
             return false;
         } finally{
             nprogress.done()
@@ -89,8 +91,8 @@ export class Service {
             )
 
         } catch (error) {
-            console.log("Appwrite service :: getPost :: error", error);
-            return false;
+            throw error;
+            // return false;
         } finally{
             nprogress.done()
         }
@@ -106,8 +108,7 @@ export class Service {
             );
             
         } catch (error) {
-            console.log("Appwrite service :: getAllPost :: error", error);
-            return false
+            throw error
         }finally{
             nprogress.done()
         }
@@ -125,7 +126,7 @@ export class Service {
                 file,
             )
         } catch (error) {
-            console.log("Appwrite service :: uploadFile :: error", error);
+            toast.error(`Unable to upload file: ${error.message} `)
             return false;
         } finally{
             nprogress.done()
@@ -141,7 +142,7 @@ export class Service {
             );
             return true;
         } catch (error) {
-            console.log("Appwrite service :: getAllPost :: error", error);
+            toast.error(`Unable to delete file: ${error.message}`)
             return false;
         } finally{
             nprogress.done()

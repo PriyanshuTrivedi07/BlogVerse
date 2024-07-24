@@ -5,6 +5,7 @@ import { login } from "../slices/authSlice"
 import { Button, Logo, Input } from "./index"
 import { useDispatch } from 'react-redux'
 import { useForm } from 'react-hook-form'
+import { toast } from 'react-toastify'
 
 function Signup() {
     const navigate = useNavigate()
@@ -19,12 +20,14 @@ function Signup() {
             if (userData) {
                 const userData = await authService.getCurrentUser()
                 if (userData) {
-                    dispatch(login(userData));
+                    dispatch(login({userData}));
+                    toast.success('Account created successfully');
                     navigate("/")
                 }
             }
         } catch (error) {
             setError(error.message)
+            toast.error('Unable to create Account')
         }
     }
 

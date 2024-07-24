@@ -5,6 +5,7 @@ import authService from '../../appwrite/auth'
 import service from '../../appwrite/config'
 import { useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
+import { toast } from 'react-toastify'
 
 
 function PostForm({ post }) {
@@ -22,30 +23,47 @@ function PostForm({ post }) {
 
 
     const submit = async (data) => {
-        console.log(typeof data.content);
         if (post) {
-            const file = data.image[0] ? service.uploadFile(data.image[0]) : null
+            const file = data.image[0] ? await service.uploadFile(data.image[0]) : null
 
             if (file) {
-                service.deleteFile(post.featuredImage)
+                // Delete the old featured image
+                await service.deleteFile(post.featuredImage)
+
+                // Update the post with the new featured image
+                await service.updatePost(post.$id, {
+                    ...data,
+                    featuredImage: file ? file.$id : undefined
+                })
+                    .then((dbPost) => {
+                        toast.success('Post updated successfully')
+                        if (dbPost) navigate(`/post/${dbPost.$id}`)
+                    }).catch((error) => {
+                        toast.error(`Failed to update post: ${error.message}`);
+                    })
             }
-            const dbPost = await service.updatePost(post.$id, {
-                ...data,
-                featuredImage: file ? file.$id : undefined
-            })
-            if (dbPost) {
-                navigate(`/post/${dbPost.$id}`)
+            else {
+                // If no new file is uploaded, just update other post details
+                await service.updatePost(post.$id, data)
+                    .then((dbPost) => {
+                        toast.success('Post updated successfully')
+                        if (dbPost) navigate(`/post/${dbPost.$id}`)
+                    }).catch((error) => {
+                        toast.error(`Failed to update post: ${error.message}`);
+                    })
             }
         } else {
             const file = await service.uploadFile(data.image[0]);
-
             if (file) {
                 const fileId = file.$id
                 data.featuredImage = fileId
-                const dbPost = await service.createPost({ ...data, userId: userData.$id });
-                if (dbPost) {
-                    navigate(`/post/${dbPost.$id}`)
-                }
+                await service.createPost({ ...data, userId: userData.$id })
+                    .then((dbPost) => {
+                        toast.success('Post created successfully')
+                        if (dbPost) navigate(`/post/${dbPost.$id}`)
+                    }).catch((error) => {
+                        toast.error(`Failed to create post: ${error.message}`);
+                    })
             }
         }
     }
