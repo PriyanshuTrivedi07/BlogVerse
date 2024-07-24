@@ -5,7 +5,7 @@ import { login as storeLogin } from "../slices/authSlice"
 import { Button, Input, Logo } from '../components/index'
 import { useDispatch } from 'react-redux'
 import { useForm } from 'react-hook-form'
-
+import { toast } from 'react-toastify';
 
 function Login() {
     const navigate = useNavigate();
@@ -23,12 +23,14 @@ function Login() {
                 const userData = await authService.getCurrentUser()
 
                 if (userData) {
-                    dispatch(storeLogin({userData}));
+                    dispatch(storeLogin({ userData }));
+                    toast.success('Logged in successfully');
                     navigate('/')
                 }
             }
         } catch (error) {
             setError(error.message)
+            toast.error(`Login failed, Try Again !`);
         }
     }
 
@@ -44,7 +46,7 @@ function Login() {
                 <h2 className="text-2xl font-bold mb-8 text-center">Log in to your account</h2>
 
                 {error && <p className="text-red-600 mt-8 text-center">{error}</p>}
-                
+
                 <form onSubmit={handleSubmit(login)} className="space-y-6">
                     <div>
                         <Input
